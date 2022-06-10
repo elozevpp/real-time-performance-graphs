@@ -1,0 +1,39 @@
+version: '3.9'
+services:
+  server:
+    container_name: express-server
+    build: server/.
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server/.:/app
+    command: yarn start-local
+    networks:
+      - real_time_performance_graphs
+  app:
+    container_name: react-client
+    build: app/.
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./app/.:/app
+    command: yarn start
+    networks:
+      - real_time_performance_graphs
+  db:
+    container_name: mongodb
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    ports:
+      - "27017:27017"
+    volumes:
+      -  /Users/$USER/data/real-time-performance-graphs_mongo:/data/db
+    networks:
+      - real_time_performance_graphs
+
+networks:
+  real_time_performance_graphs:
+    name: real_time_performance_graphs
