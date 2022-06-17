@@ -27,6 +27,12 @@ const socket = io(`ws://${SERVER_DOMAIN}/`, { transports: ['websocket'] });
 
 const httpEndpoint = `http://${SERVER_DOMAIN}`;
 
+const availableStocks = {
+  tesla: 'Tesla',
+  apple: 'Apple',
+  microsoft: 'Microsoft',
+};
+
 const StockSubscriber = () => {
   const [stockPrices, setStockPrices] = useState([]);
 
@@ -47,18 +53,37 @@ const StockSubscriber = () => {
 
   socket.on('update', (update) => {
     console.log('on.update: ', update);
-    setStockPrices((_stockPrices) => [update, ..._stockPrices]);
+    setStockPrices((_stockPrices) => [..._stockPrices, update]);
   });
 
   useEffect(() => {
     return () => socket.disconnect();
   }, []);
 
+  const onCheck = (e) => {
+    const id = e.currentTarget.id;
+    const checked = e.currentTarget.checked;
+
+    if (checked) {
+      socket.emit('subscribe', id);
+    } else {
+      socket.emit('unsubscribe', id);
+    }
+  };
+
   return (
     <div style={{ width: '90%', maxWidth: '1200px' }}>
-      <h3>Stocks</h3>
+      <h3>Subscribe to:</h3>
+      {Object.keys(availableStocks).map((stock) => (
+        <span style={{ fontSize: '16px' }}>
+          {availableStocks[stock]}{' '}
+          <input key={stock} id={stock} type="checkbox" onChange={onCheck} />{' '}
+          {' | '}
+        </span>
+      ))}
+
       <div>
-        <PerformanceChart stockPrices={stockPrices} />
+        <PerformanceChart stockPrices={stockPrices.reverse()} />
       </div>
     </div>
   );
@@ -82,15 +107,15 @@ export const options = {
   },
 };
 
-const PerformanceChart = ({ stockPrices }) => {
+const PerformanceChart = ({ stockList }) => {
   const data = {
-    labels: stockPrices
-      .reverse()
-      .map(({ recordedTime }) => new Date(recordedTime).toLocaleString()),
+    labels: stockList.map(({ recordedTime }) =>
+      new Date(recordedTime).toLocaleString(),
+    ),
     datasets: [
       {
         label: 'Tesla',
-        data: stockPrices.reverse().map(({ price }) => price),
+        data: stockList.map(({ price }) => price),
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
       },

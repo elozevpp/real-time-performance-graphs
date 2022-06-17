@@ -16,8 +16,15 @@ const { startGeneration } = require('./util/generate-random-prices');
 
 const PORT = process.env.PORT || 3000;
 
+const availableStocks = {
+  tesla: 'Tesla',
+  apple: 'Apple',
+  microsoft: 'Microsoft',
+};
+
 startGeneration((newRecord) => {
-  io.emit('update', newRecord);
+  console.log("🚀 ~ file: index.js ~ line 20 ~ startGeneration ~ newRecord", newRecord)
+  io.to('tesla').emit('update', newRecord);
 });
 
 const getAllStockPrices = async () => {
@@ -45,7 +52,20 @@ io.on('connection', async (socket) => {
 
   socket.emit('init', stockPricesNow);
 
+
+  socket.on('subscribe', async (stockId) => {
+    console.log('subscribe to: ', stockId);
+    const stockPricesNow = await getAllStockPrices();
+    socket.emit('init', stockPricesNow);
+    socket.join(stockId);
+  })
+
+  socket.on('unsubscribe', (stockId) => {
+    console.log('unsubscribe to: ', stockId);
+    socket.leave(stockId);
+  })
 })
+
 
 
 server.listen(PORT, () => {

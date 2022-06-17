@@ -35,7 +35,7 @@ async function insertNewPrice (newPrice) {
   }
 
   await stockPrices.insertOne(newRecord);
-  
+
   const [latestRecord] = await stockPrices.find({}, { sort: {recordedTime: -1 }, limit: 1}).toArray();
   return latestRecord;
 }
