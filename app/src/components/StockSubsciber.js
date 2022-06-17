@@ -84,13 +84,13 @@ export const options = {
 
 const PerformanceChart = ({ stockPrices }) => {
   const data = {
-    labels: stockPrices.map(({ recordedTime }) =>
-      new Date(recordedTime).toLocaleTimeString(),
-    ),
+    labels: stockPrices
+      .reverse()
+      .map(({ recordedTime }) => new Date(recordedTime).toLocaleString()),
     datasets: [
       {
         label: 'Tesla',
-        data: stockPrices.map(({ price }) => price),
+        data: stockPrices.reverse().map(({ price }) => price),
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
       },
