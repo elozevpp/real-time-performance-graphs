@@ -2,7 +2,7 @@ const { getDatabase } = require('../db');
 const uuid = require('uuid-mongodb');
 
 
-const INTERVAL = 35000;
+const INTERVAL = 5000;
 
 function randomNumberFromInterval(min, max) {
   return Math.random() * (max - min + 1) + min;
@@ -27,19 +27,26 @@ async function insertNewPrice (newPrice) {
   const db = await getDatabase();
   const stockPrices = db.collection('stock-prices');
 
-  await stockPrices.insertOne({ 
+  const newRecord = { 
     _id: uuid.v4().toString,
     price: newPrice,
     stock: 'Tesla',
     recordedTime: new Date()
-  });
+  }
+
+  await stockPrices.insertOne(newRecord);
+  
+  const [latestRecord] = await stockPrices.find({}, { sort: {recordedTime: -1 }, limit: 1}).toArray();
+  return latestRecord;
 }
 
-const startGeneration = () => {
+const startGeneration = (cb) => {
   setTimeout(async () => {
     const newPrice = await generateRandomPrices();
-    await insertNewPrice(newPrice);
-    startGeneration();
+    const newRecord = await insertNewPrice(newPrice);
+
+    cb && cb(newRecord);
+    startGeneration(cb);
   }, INTERVAL);
 }
 
