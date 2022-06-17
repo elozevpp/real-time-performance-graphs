@@ -1,5 +1,8 @@
 # Real Time Performance Graphs
 
+![Frontend](example.png "Frontend")
+
+
 Intend to build a client/server application that will subscribe to updates in a database. The client (React app) will show a graph of a performance of a particular stock, which will be web-socket-ed to an express/socket.io server.
 
 The project contains:

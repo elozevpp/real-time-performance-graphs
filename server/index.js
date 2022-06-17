@@ -23,7 +23,6 @@ const availableStocks = {
 };
 
 startGeneration((newRecord) => {
-  console.log("🚀 ~ file: index.js ~ line 20 ~ startGeneration ~ newRecord", newRecord)
   io.to('tesla').emit('update', newRecord);
 });
 
