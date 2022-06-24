@@ -23,14 +23,14 @@ async function generateRandomPrices() {
   return newPrice;
 }
 
-async function insertNewPrice (newPrice) {
+async function insertNewPrice (stockName, newPrice) {
   const db = await getDatabase();
   const stockPrices = db.collection('stock-prices');
 
   const newRecord = { 
     _id: uuid.v4().toString,
     price: newPrice,
-    stock: 'Tesla',
+    stock: stockName,
     recordedTime: new Date()
   }
 
@@ -40,13 +40,13 @@ async function insertNewPrice (newPrice) {
   return latestRecord;
 }
 
-const startGeneration = (cb) => {
+const startGeneration = (stockName, cb) => {
   setTimeout(async () => {
     const newPrice = await generateRandomPrices();
-    const newRecord = await insertNewPrice(newPrice);
+    const newRecord = await insertNewPrice(stockName, newPrice);
 
     cb && cb(newRecord);
-    startGeneration(cb);
+    startGeneration(stockName, cb);
   }, INTERVAL);
 }
 

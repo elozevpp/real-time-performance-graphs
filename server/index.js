@@ -22,15 +22,23 @@ const availableStocks = {
   microsoft: 'Microsoft',
 };
 
-startGeneration((newRecord) => {
-  io.to('tesla').emit('update', newRecord);
+startGeneration(availableStocks.tesla, (newRecord) => {
+  io.to('tesla').emit('update:tesla', newRecord);
 });
 
-const getAllStockPrices = async () => {
+startGeneration(availableStocks.apple, (newRecord) => {
+  io.to('apple').emit('update:apple', newRecord);
+});
+
+startGeneration(availableStocks.microsoft, (newRecord) => {
+  io.to('microsoft').emit('update:microsoft', newRecord);
+});
+
+const getAllStockPrices = async (stockName) => {
   const db = await getDatabase();
 
   const stockPricesCollection = await db.collection('stock-prices');
-  const result = await stockPricesCollection.find({}, { sort: { recordedTime: -1 }}).toArray();
+  const result = await stockPricesCollection.find({ stock: stockName }, { $sort: { recordedTime: -1 } }).toArray();
   return result;
 }
 
@@ -51,11 +59,10 @@ io.on('connection', async (socket) => {
 
   socket.emit('init', stockPricesNow);
 
-
   socket.on('subscribe', async (stockId) => {
     console.log('subscribe to: ', stockId);
-    const stockPricesNow = await getAllStockPrices();
-    socket.emit('init', stockPricesNow);
+    const stockPricesNow = await getAllStockPrices(availableStocks[stockId]);
+    socket.emit(`init:${stockId}`, stockPricesNow);
     socket.join(stockId);
   })
 

@@ -1,5 +1,5 @@
 import './App.css';
-import StockSubscriber from './components/StockSubsciber';
+import StockSubscriber from './components/StockSubscriber';
 
 function App() {
   return (
